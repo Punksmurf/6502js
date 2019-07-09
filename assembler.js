@@ -1422,6 +1422,8 @@ function SimulatorWidget(node) {
         var value = popByte();
         if (value == 0)
           message(String.fromCharCode(regA));
+        if (value == 1)
+          message('A: ' + regA.toString(10) + ' ($' + regA.toString(16) + ', b' + regA.toString(2) + ')');
       },
 
       iec: function () {
