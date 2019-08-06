@@ -52,12 +52,18 @@ function SimulatorWidget(node) {
     $node.find('.stepButton').click(simulator.debugExec);
     $node.find('.gotoButton').click(simulator.gotoAddr);
     $node.find('.notesButton').click(ui.showNotes);
+    $node.find('.linkButton').click(ui.copyLink);
 
     var editor = $node.find('.code');
 
     editor.on('keypress input', simulator.stop);
     editor.on('keypress input', ui.initialize);
     editor.keydown(ui.captureTabInEditor);
+
+    var params = location.search.substr(1).split('&').map(kv => kv.split('=')).reduce((acc, cur) => { acc[cur[0]] = cur[1]; return acc; }, {});
+    if (params.c) {
+      editor.val(atob(params.c));
+    }
 
     $(document).keypress(memory.storeKeypress);
 
@@ -162,6 +168,41 @@ function SimulatorWidget(node) {
       $node.find('.messages code').html($node.find('.notes').html());
     }
 
+    function copyLink() {
+      var code = $node.find('.code').val();
+      var link = new URL(location);
+      link.search = '?c=' + btoa(code);
+      copyToClipboard(link.toString());
+    }
+
+    function copyToClipboard(text){
+
+      var tempElement = document.createElement("textarea");
+
+      // Element must be "visible"
+      tempElement.style.width = '0';
+      tempElement.style.height = '0';
+      tempElement.style.opacity = '0';
+
+      document.body.appendChild(tempElement);
+
+      tempElement.value = text;
+      tempElement.select();
+
+      try {
+        var success = document.execCommand('copy');
+        if (!success) {
+          console.error("Cannot copy text");
+        } else {
+          $node.find('.messages code').append('Text copied to clipboard: ' + text + '\n');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+
+      document.body.removeChild(tempElement);
+    }
+
     function captureTabInEditor(e) {
       // Tab Key
       if(e.keyCode === 9) {
@@ -190,7 +231,8 @@ function SimulatorWidget(node) {
       debugOff: debugOff,
       toggleMonitor: toggleMonitor,
       showNotes: showNotes,
-      captureTabInEditor: captureTabInEditor
+      captureTabInEditor: captureTabInEditor,
+      copyLink: copyLink
     };
   }
 
