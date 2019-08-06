@@ -1464,8 +1464,30 @@ function SimulatorWidget(node) {
         var value = popByte();
         if (value == 0)
           message(String.fromCharCode(regA));
-        if (value == 1)
-          message('A: ' + regA.toString(10) + ' ($' + regA.toString(16) + ', b' + regA.toString(2) + ')');
+        if (value == 1) {
+          var m = 'A: ' + format(regA) + '\n';
+          m    += 'X: ' + format(regX) + '\n';
+          m    += 'Y: ' + format(regY) + '\n';
+          m    += 'SP: $' + regSP.toString(16) + '\n';
+          m    += 'PC: $' + regPC.toString(16) + '\n';
+          m    += 'NV-BDIZC: ' + getFlags() + '\n';
+          message(m);
+        }
+
+        function format(v) {
+          return v.toString(10) + ' ($' + v.toString(16) + ', b' + v.toString(2) + ')'
+        }
+
+        function getFlags() {
+          var f = '';
+          for (var i = 7; i >=0; i--) {
+            if (i != 5)
+              f += regP >> i & 1;
+            else
+              f += '-';
+          }
+          return f;
+        }
       },
 
       iec: function () {
