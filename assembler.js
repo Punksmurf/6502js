@@ -63,6 +63,24 @@ function SimulatorWidget(node) {
     var params = location.search.substr(1).split('&').map(kv => kv.split('=')).reduce((acc, cur) => { acc[cur[0]] = cur[1]; return acc; }, {});
     if (params.c) {
       editor.val(atob(params.c));
+    } else if (params.g) {
+      $(editor).prop('disabled', true);
+      fetch(`https://gist.githubusercontent.com/${params.g}/raw`)
+        .then(response => {
+          if(response.ok) {
+            return response.text();
+          }
+          throw new Error(`Unable to retrieve gist: ${response.statusText} (${response.status})`);
+        })
+        .then(text => {
+          editor.val(text);
+          $(editor).prop('disabled', false);
+        })
+        .catch(error => {
+          console.warn(error);
+          alert(error.message);
+          $(editor).prop('disabled', false);
+        });
     }
 
     $(document).keypress(memory.storeKeypress);
